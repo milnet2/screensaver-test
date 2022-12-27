@@ -9,14 +9,15 @@ func main() {
 	var config = configure()
 
 	var dbusAdapter = new(dbus2.DBusAdapter)
-	dbusAdapter.Init(&dbus2.DbusConfig{config.isDbusSystemConnection})
+	dbusAdapter.Init(&dbus2.DbusConfig{IsDbusSystemConnection: config.isDbusSystemConnection})
 	dbusAdapter.ListNames()
 
 	var dbusChannel = make(chan dbus2.DBusMessage)
 
-	dbusSources := [2]dbus2.DBusSource{
+	dbusSources := []dbus2.DBusSource{
 		new(dbus2.LoginManager),
 		new(dbus2.PowerManagement),
+		new(dbus2.SystemD),
 	}
 
 	for _, source := range dbusSources {
