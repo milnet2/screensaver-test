@@ -1,1 +1,2 @@
 * No constructor?!
+* Output in parameter (channel)

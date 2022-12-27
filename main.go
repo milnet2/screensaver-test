@@ -8,6 +8,10 @@ func main() {
 	var dbus = new(DBusAdapter)
 	dbus.Init(&config)
 
-	fmt.Println(config)
-	fmt.Println(&dbus)
+	var dbusChannel = make(chan DBusMessage)
+	dbus.Listen(dbusChannel)
+
+	for message := range dbusChannel {
+		fmt.Println(message)
+	}
 }

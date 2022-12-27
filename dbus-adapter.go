@@ -19,6 +19,8 @@ type DBusMessage struct {
 type DBusAdapter struct {
 	config *config
 
+	dbusInterface string `default:"org.freedesktop.login1.Manager"`
+
 	conn *dbus.Conn
 }
 
@@ -33,7 +35,6 @@ func (self DBusAdapter) connectOrExit() *dbus.Conn {
 
 	if self.config.isDbusSystemConnection {
 		conn, err = dbus.ConnectSystemBus()
-
 	} else {
 		conn, err = dbus.ConnectSessionBus()
 	}
@@ -42,26 +43,62 @@ func (self DBusAdapter) connectOrExit() *dbus.Conn {
 		fmt.Fprintln(os.Stderr, "Failed to connect to session bus:", err)
 		os.Exit(1)
 	}
-	defer conn.Close()
+	//defer conn.Close() // TODO at some point close the connection
 
 	self.conn = conn
 	return conn
 }
 
-func (self DBusAdapter) Listen() {
+// See: https://github.com/godbus/dbus/tree/master/_examples
 
-	for _, v := range []string{"method_call", "method_return", "error", "signal"} {
-		call := self.conn.BusObject().Call("org.freedesktop.DBus.AddMatch", 0,
-			"eavesdrop='true',type='"+v+"'")
-		if call.Err != nil {
-			fmt.Fprintln(os.Stderr, "Failed to add match:", call.Err)
-			os.Exit(1)
+func (self DBusAdapter) Listen(listener chan DBusMessage) {
+	self.readCurrentProperties(listener)
+
+	// DBUs:
+	// method call time=1672161608.325197 sender=:1.65 -> destination=org.freedesktop.login1 serial=2 path=/org/freedesktop/login1; interface=org.freedesktop.login1.Manager; member=Inhibit
+	//   string "idle:sleep:shutdown"
+
+	//for _, v := range []string{"Inhibit"} {
+	//	call := self.conn.BusObject().Call("org.freedesktop.login1.Manager", 0,
+	//		"eavesdrop='true',type='"+v+"'")
+	//
+	//	if call.Err != nil {
+	//		fmt.Fprintln(os.Stderr, "Failed to add match:", call.Err)
+	//		os.Exit(1)
+	//	} else {
+	//		listener <- DBusMessage{
+	//			messageType: call.Method,
+	//		}
+	//	}
+	//}
+
+	//c := make(chan *dbus.Message, 10)
+	//self.conn.Eavesdrop(c)
+	//fmt.Println("Listening for everything")
+	//for v := range c {
+	//	fmt.Println(v)
+	//}
+}
+
+func (self DBusAdapter) readCurrentProperties(listener chan DBusMessage) {
+	//    string "org.freedesktop.login1.Manager"
+	//   array [
+	//      dict entry(
+	//         string "BlockInhibited"
+	//         variant             string "shutdown:sleep:idle"
+	//      )
+	//   ]
+	//   array [
+	//   ]
+
+	var variant, err = self.conn.BusObject().GetProperty("org.freedesktop.login1.Manager.BlockInhibited")
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Failed to connect to session bus:", err)
+		os.Exit(1)
+	} else {
+		listener <- DBusMessage{
+			messageType: variant.String(),
 		}
-	}
-	c := make(chan *dbus.Message, 10)
-	self.conn.Eavesdrop(c)
-	fmt.Println("Listening for everything")
-	for v := range c {
-		fmt.Println(v)
 	}
 }
