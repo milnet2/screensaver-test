@@ -30,9 +30,20 @@ func (self LoginManager) readIdleHint(listener chan DBusMessage) {
 func (self LoginManager) readCurrentInhibitors(listener chan DBusMessage) {
 	// See:
 	// dbus-send --system --print-reply --type="method_call"  --dest=org.freedesktop.login1 /org/freedesktop/login1  org.freedesktop.login1.Manager.ListInhibitors
+	var response = new(InhibitorResponse)
 	self.adapter.readCurrentInhibitorsFrom(
 		listener,
 		"org.freedesktop.login1",
 		"org.freedesktop.login1.Manager.ListInhibitors",
-		"/org/freedesktop/login1")
+		"/org/freedesktop/login1",
+		response)
+}
+
+type InhibitorResponse struct {
+	inhibitions string
+	issuer      string
+	reason      string
+	action      string
+	a           int32
+	b           int32
 }

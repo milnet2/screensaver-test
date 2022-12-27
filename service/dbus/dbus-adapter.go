@@ -54,16 +54,17 @@ func (self DBusAdapter) connectOrExit() *dbus.Conn {
 }
 
 // See: https://github.com/godbus/dbus/tree/master/_examples
-func (self DBusAdapter) readCurrentInhibitorsFrom(listener chan DBusMessage, dbusDestObject string, dbusMethod string, dbusPath dbus.ObjectPath) {
+func (self DBusAdapter) readCurrentInhibitorsFrom(listener chan DBusMessage, dbusDestObject string, dbusMethod string, dbusPath dbus.ObjectPath, response ...interface{}) {
 	var dbusDestination = self.conn.Object(dbusDestObject, dbusPath)
 
-	var response string                                         // TODO: Fix type!
 	err := dbusDestination.Call(dbusMethod, 0).Store(&response) // "eavesdrop='true',type='"+v+"'")
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to add match:", err)
 		os.Exit(1)
 	}
+
+	fmt.Fprintln(os.Stderr, "Read", dbusMethod, " = ", response)
 
 	//c := make(chan *dbus.Message, 10)
 	//self.conn.Eavesdrop(c)
