@@ -10,9 +10,9 @@ type DbusConfig struct {
 	IsDbusSystemConnection bool
 }
 
-type DBus interface {
-	Listen()
-	Stop()
+type DBusSource interface {
+	Init(adapter *DBusAdapter)
+	Read(listener chan DBusMessage)
 }
 
 type DBusMessage struct {

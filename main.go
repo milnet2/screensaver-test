@@ -13,13 +13,15 @@ func main() {
 
 	var dbusChannel = make(chan dbus2.DBusMessage)
 
-	var loginManagerDbus = new(dbus2.LoginManager)
-	loginManagerDbus.Init(dbusAdapter)
-	var powerManagementDbus = new(dbus2.PowerManagement)
-	powerManagementDbus.Init(dbusAdapter)
+	dbusSources := [2]dbus2.DBusSource{
+		new(dbus2.LoginManager),
+		new(dbus2.PowerManagement),
+	}
 
-	loginManagerDbus.Read(dbusChannel)
-	powerManagementDbus.Read(dbusChannel)
+	for _, source := range dbusSources {
+		source.Init(dbusAdapter)
+		source.Read(dbusChannel)
+	}
 
 	for message := range dbusChannel {
 		fmt.Println(message)
