@@ -15,9 +15,11 @@ func main() {
 
 	var loginManagerDbus = new(dbus2.LoginManager)
 	loginManagerDbus.Init(dbusAdapter)
+	var powerManagementDbus = new(dbus2.PowerManagement)
+	powerManagementDbus.Init(dbusAdapter)
 
-	dbusAdapter.Listen(dbusChannel)
 	loginManagerDbus.Read(dbusChannel)
+	powerManagementDbus.Read(dbusChannel)
 
 	for message := range dbusChannel {
 		fmt.Println(message)
