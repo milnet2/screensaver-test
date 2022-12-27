@@ -10,6 +10,7 @@ func main() {
 
 	var dbusAdapter = new(dbus2.DBusAdapter)
 	dbusAdapter.Init(&dbus2.DbusConfig{config.isDbusSystemConnection})
+	dbusAdapter.ListNames()
 
 	var dbusChannel = make(chan dbus2.DBusMessage)
 
@@ -20,7 +21,9 @@ func main() {
 
 	for _, source := range dbusSources {
 		source.Init(dbusAdapter)
-		source.Read(dbusChannel)
+		if source.IsApplicable() {
+			source.Read(dbusChannel)
+		}
 	}
 
 	for message := range dbusChannel {

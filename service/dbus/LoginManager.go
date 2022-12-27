@@ -13,6 +13,10 @@ func (self LoginManager) Read(listener chan DBusMessage) {
 	self.readCurrentInhibitors(listener)
 }
 
+func (self LoginManager) IsApplicable() bool {
+	return self.adapter.isObjectPresent("org.freedesktop.login1")
+}
+
 func (self LoginManager) readIdleHint(listener chan DBusMessage) {
 	// Query login-manager:
 	// like `dbus-send --print-reply --dest=org.freedesktop.login1.Manager /org/freedesktop/PowerManagement/Inhibit org.freedesktop.PowerManagement.Inhibit.HasInhibit`

@@ -13,6 +13,7 @@ type DbusConfig struct {
 type DBusSource interface {
 	Init(adapter *DBusAdapter)
 	Read(listener chan DBusMessage)
+	IsApplicable() bool
 }
 
 type DBusMessage struct {
@@ -25,12 +26,14 @@ type DBusAdapter struct {
 
 	dbusInterfaceName string `default:"org.freedesktop.login1.Manager"`
 
-	conn *dbus.Conn
+	conn         *dbus.Conn
+	knownObjects []string
 }
 
 func (self *DBusAdapter) Init(config *DbusConfig) {
 	self.config = config             // TODO: Null-check
 	self.conn = self.connectOrExit() // TODO: Logic in constructor is bad
+	self.knownObjects = self.ListNames()
 }
 
 func (self DBusAdapter) connectOrExit() *dbus.Conn {
@@ -51,6 +54,26 @@ func (self DBusAdapter) connectOrExit() *dbus.Conn {
 
 	self.conn = conn
 	return conn
+}
+
+func (self DBusAdapter) isObjectPresent(dbusDestObject string) bool {
+	for _, elem := range self.knownObjects {
+		if elem == dbusDestObject {
+			return true
+		}
+	}
+	return false
+}
+
+func (self DBusAdapter) ListNames() []string {
+	var ret []string
+	var err = self.conn.BusObject().Call("org.freedesktop.DBus.ListNames", 0).Store(&ret)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Failed to get list of owned names:", err)
+		os.Exit(1)
+	}
+
+	return ret
 }
 
 // See: https://github.com/godbus/dbus/tree/master/_examples
