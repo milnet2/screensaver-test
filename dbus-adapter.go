@@ -52,6 +52,7 @@ func (self DBusAdapter) connectOrExit() *dbus.Conn {
 // See: https://github.com/godbus/dbus/tree/master/_examples
 
 func (self DBusAdapter) Listen(listener chan DBusMessage) {
+	self.readCurrentInhibitors(listener)
 	self.readCurrentProperties(listener)
 
 	// DBUs:
@@ -71,6 +72,33 @@ func (self DBusAdapter) Listen(listener chan DBusMessage) {
 	//		}
 	//	}
 	//}
+
+	//c := make(chan *dbus.Message, 10)
+	//self.conn.Eavesdrop(c)
+	//fmt.Println("Listening for everything")
+	//for v := range c {
+	//	fmt.Println(v)
+	//}
+}
+
+func (self DBusAdapter) readCurrentInhibitors(listener chan DBusMessage) {
+	self.readCurrentInhibitorsFrom(
+		listener,
+		"org.freedesktop.login1",
+		"org.freedesktop.login1.Manager.ListInhibitors",
+		"/org/freedesktop/login1")
+}
+
+func (self DBusAdapter) readCurrentInhibitorsFrom(listener chan DBusMessage, dbusDestObject string, dbusMethod string, dbusPath dbus.ObjectPath) {
+	var dbusDestination = self.conn.Object(dbusDestObject, dbusPath)
+
+	var response string                                         // TODO: Fix type!
+	err := dbusDestination.Call(dbusMethod, 0).Store(&response) // "eavesdrop='true',type='"+v+"'")
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Failed to add match:", err)
+		os.Exit(1)
+	}
 
 	//c := make(chan *dbus.Message, 10)
 	//self.conn.Eavesdrop(c)
@@ -138,9 +166,9 @@ func (self DBusAdapter) readCurrentPropertiesFrom(listener chan DBusMessage, dbu
 		fmt.Fprintln(os.Stderr, "Failed to connect to session bus:", err)
 		os.Exit(1)
 	} else {
-		fmt.Fprintln(os.Stderr, "Read", variant)
-		listener <- DBusMessage{
-			messageType: variant.String(),
-		}
+		fmt.Fprintln(os.Stderr, "Read", dbusInterface, " = ", variant)
+		//listener <- DBusMessage{
+		//	messageType: variant.String(),
+		//}
 	}
 }
