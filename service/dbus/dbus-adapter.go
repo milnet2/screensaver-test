@@ -56,7 +56,7 @@ func (self DBusAdapter) connectOrExit() *dbus.Conn {
 // See: https://github.com/godbus/dbus/tree/master/_examples
 
 func (self DBusAdapter) Listen(listener chan DBusMessage) {
-	self.readCurrentInhibitors(listener)
+	//self.readCurrentInhibitors(listener)
 	self.readCurrentProperties(listener)
 
 	// DBUs:
@@ -83,14 +83,6 @@ func (self DBusAdapter) Listen(listener chan DBusMessage) {
 	//for v := range c {
 	//	fmt.Println(v)
 	//}
-}
-
-func (self DBusAdapter) readCurrentInhibitors(listener chan DBusMessage) {
-	self.readCurrentInhibitorsFrom(
-		listener,
-		"org.freedesktop.login1",
-		"org.freedesktop.login1.Manager.ListInhibitors",
-		"/org/freedesktop/login1")
 }
 
 func (self DBusAdapter) readCurrentInhibitorsFrom(listener chan DBusMessage, dbusDestObject string, dbusMethod string, dbusPath dbus.ObjectPath) {
@@ -137,18 +129,6 @@ func (self DBusAdapter) readCurrentProperties(listener chan DBusMessage) {
 	//const dbusPath = "/org/freedesktop/login1"
 	//const dbusObject = "org.freedesktop.login1.Manager"
 	//const dbusPropertyKey = "BlockInhibited"
-
-	// Query login-manager:
-	// like `dbus-send --print-reply --dest=org.freedesktop.login1.Manager /org/freedesktop/PowerManagement/Inhibit org.freedesktop.PowerManagement.Inhibit.HasInhibit`
-	//dbus-send --system --print-reply \
-	//--dest=org.freedesktop.login1 /org/freedesktop/login1/session/self \
-	// "org.freedesktop.login1.Session.SetIdleHint" boolean:true
-	// See: `gdbus introspect -y -d org.freedesktop.login1 -o /org/freedesktop/login1/session/auto`
-	self.readCurrentPropertiesFrom(
-		listener,
-		"org.freedesktop.login1",
-		"org.freedesktop.login1.Session.IdleHint",
-		"/org/freedesktop/login1/session/self")
 
 	// Query legacy PM:
 	// like `dbus-send --system --print-reply --dest=org.freedesktop.PowerManagement /org/freedesktop/PowerManagement/Inhibit org.freedesktop.PowerManagement.Inhibit.HasInhibit`
