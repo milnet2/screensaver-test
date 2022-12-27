@@ -37,6 +37,7 @@ func main() {
 
 	x11Sources := []x11.X11Source{
 		new(x11.DPMS),
+		new(x11.ProtoScreensaver),
 	}
 
 	for _, source := range x11Sources {
