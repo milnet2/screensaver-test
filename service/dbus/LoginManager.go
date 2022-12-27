@@ -13,6 +13,7 @@ func (self *LoginManager) Init(adapter *DBusAdapter) {
 
 func (self LoginManager) Read(listener chan DBusMessage) {
 	self.readIdleHint(listener)
+	self.readBlockInhibited(listener)
 	self.readCurrentInhibitors(listener)
 }
 
@@ -33,6 +34,14 @@ func (self LoginManager) readIdleHint(listener chan DBusMessage) {
 		self.dbusDestinationObject,
 		"org.freedesktop.login1.Session.IdleHint",
 		"/org/freedesktop/login1/session/self")
+}
+
+func (self LoginManager) readBlockInhibited(listener chan DBusMessage) {
+	self.adapter.readCurrentPropertiesFrom(
+		listener,
+		self.dbusDestinationObject,
+		"org.freedesktop.login1.Manager.BlockInhibited",
+		"/org/freedesktop/login1")
 }
 
 func (self LoginManager) readCurrentInhibitors(listener chan DBusMessage) {
