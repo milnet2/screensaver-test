@@ -2,10 +2,13 @@ package dbus
 
 type LoginManager struct {
 	adapter *DBusAdapter
+
+	dbusDestinationObject string `default:"org.freedesktop.login1"`
 }
 
 func (self *LoginManager) Init(adapter *DBusAdapter) {
 	self.adapter = adapter
+	self.dbusDestinationObject = "org.freedesktop.login1"
 }
 
 func (self LoginManager) Read(listener chan DBusMessage) {
@@ -14,7 +17,8 @@ func (self LoginManager) Read(listener chan DBusMessage) {
 }
 
 func (self LoginManager) IsApplicable() bool {
-	return self.adapter.isObjectPresent("org.freedesktop.login1")
+	print(self.dbusDestinationObject)
+	return self.adapter.isObjectPresent(self.dbusDestinationObject)
 }
 
 func (self LoginManager) readIdleHint(listener chan DBusMessage) {
@@ -26,7 +30,7 @@ func (self LoginManager) readIdleHint(listener chan DBusMessage) {
 	// See: `gdbus introspect -y -d org.freedesktop.login1 -o /org/freedesktop/login1/session/auto`
 	self.adapter.readCurrentPropertiesFrom(
 		listener,
-		"org.freedesktop.login1",
+		self.dbusDestinationObject,
 		"org.freedesktop.login1.Session.IdleHint",
 		"/org/freedesktop/login1/session/self")
 }
