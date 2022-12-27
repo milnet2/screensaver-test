@@ -19,7 +19,7 @@ type DBusMessage struct {
 type DBusAdapter struct {
 	config *config
 
-	dbusInterface string `default:"org.freedesktop.login1.Manager"`
+	dbusInterfaceName string `default:"org.freedesktop.login1.Manager"`
 
 	conn *dbus.Conn
 }
@@ -91,12 +91,54 @@ func (self DBusAdapter) readCurrentProperties(listener chan DBusMessage) {
 	//   array [
 	//   ]
 
-	var variant, err = self.conn.BusObject().GetProperty("org.freedesktop.login1.Manager.BlockInhibited")
+	//    bus.add_match_string_non_blocking("eavesdrop=true, path='/org/freedesktop/PowerManagement/Inhibit', interface='org.freedesktop.PowerManagement.Inhibit'")
+	//
+	//dbus-send --print-reply \
+	//      --type=method_call \
+	//      --system \
+	//      /org/freedesktop/login1  \
+	//      org.freedesktop.DBus.Properties.Get \
+	//      string:org.freedesktop.NetworkManager.Device \
+	//      string:Interface
+	//
+	//const dbusInterface = "org.freedesktop.DBus.Properties"
+	//const dbusPath = "/org/freedesktop/login1"
+	//const dbusObject = "org.freedesktop.login1.Manager"
+	//const dbusPropertyKey = "BlockInhibited"
+
+	// Query login-manager:
+	// like `dbus-send --print-reply --dest=org.freedesktop.login1.Manager /org/freedesktop/PowerManagement/Inhibit org.freedesktop.PowerManagement.Inhibit.HasInhibit`
+	//dbus-send --system --print-reply \
+	//--dest=org.freedesktop.login1 /org/freedesktop/login1/session/self \
+	// "org.freedesktop.login1.Session.SetIdleHint" boolean:true
+	// See: `gdbus introspect -y -d org.freedesktop.login1 -o /org/freedesktop/login1/session/auto`
+	self.readCurrentPropertiesFrom(
+		listener,
+		"org.freedesktop.login1",
+		"org.freedesktop.login1.Session.IdleHint",
+		"/org/freedesktop/login1/session/self")
+
+	// Query legacy PM:
+	// like `dbus-send --system --print-reply --dest=org.freedesktop.PowerManagement /org/freedesktop/PowerManagement/Inhibit org.freedesktop.PowerManagement.Inhibit.HasInhibit`
+	self.readCurrentPropertiesFrom(
+		listener,
+		"org.freedesktop.PowerManagement",
+		"org.freedesktop.PowerManagement.Inhibit.HasInhibit", // returns boolean
+		"/org/freedesktop/PowerManagement/Inhibit")
+}
+
+func (self DBusAdapter) readCurrentPropertiesFrom(listener chan DBusMessage, dbusDestObject string, dbusInterface string, dbusPath dbus.ObjectPath) {
+	var dbusPropertiesObject = self.conn.Object(dbusDestObject, dbusPath)
+
+	// GetProperty calls org.freedesktop.DBus.Properties.Get on the given object
+	var variant, err = dbusPropertiesObject.GetProperty(dbusInterface)
+	//var variant, err = self.conn.BusObject().GetProperty(dbusPath)
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to connect to session bus:", err)
 		os.Exit(1)
 	} else {
+		fmt.Fprintln(os.Stderr, "Read", variant)
 		listener <- DBusMessage{
 			messageType: variant.String(),
 		}
