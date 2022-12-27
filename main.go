@@ -21,6 +21,7 @@ func main() {
 		new(dbus2.LoginManager),
 		new(dbus2.PowerManagement),
 		new(dbus2.SystemD),
+		new(dbus2.ScreenSaver),
 	}
 
 	for _, source := range dbusSources {
