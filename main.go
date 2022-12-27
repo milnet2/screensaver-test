@@ -1,14 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	dbus2 "screensaver-test/service/dbus"
+)
 
 func main() {
 	var config = configure()
 
-	var dbus = new(DBusAdapter)
-	dbus.Init(&config)
+	var dbus = new(dbus2.DBusAdapter)
+	dbus.Init(&dbus2.DbusConfig{config.isDbusSystemConnection})
 
-	var dbusChannel = make(chan DBusMessage)
+	var dbusChannel = make(chan dbus2.DBusMessage)
 	dbus.Listen(dbusChannel)
 
 	for message := range dbusChannel {

@@ -1,10 +1,14 @@
-package main
+package dbus
 
 import (
 	"fmt"
 	"github.com/godbus/dbus/v5"
 	"os"
 )
+
+type DbusConfig struct {
+	IsDbusSystemConnection bool
+}
 
 type DBus interface {
 	Listen()
@@ -17,14 +21,14 @@ type DBusMessage struct {
 
 // DBusAdapter - Classes are structs in go...
 type DBusAdapter struct {
-	config *config
+	config *DbusConfig
 
 	dbusInterfaceName string `default:"org.freedesktop.login1.Manager"`
 
 	conn *dbus.Conn
 }
 
-func (self *DBusAdapter) Init(config *config) {
+func (self *DBusAdapter) Init(config *DbusConfig) {
 	self.config = config             // TODO: Null-check
 	self.conn = self.connectOrExit() // TODO: Logic in constructor is bad
 }
@@ -33,7 +37,7 @@ func (self DBusAdapter) connectOrExit() *dbus.Conn {
 	var conn *dbus.Conn
 	var err error
 
-	if self.config.isDbusSystemConnection {
+	if self.config.IsDbusSystemConnection {
 		conn, err = dbus.ConnectSystemBus()
 	} else {
 		conn, err = dbus.ConnectSessionBus()
