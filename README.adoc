@@ -1,0 +1,24 @@
+== Screensaver issue analyzer
+
+Mission Statement:: Learn *go* and solve my *standby-issues* at the same time
+
+CAUTION:: This is my first _go_ project and will likely never be finished!
+
+=== Goal
+
+This is a _learning-project_ for me, and I want to endeavour:
+
+* Asynchronously
+** By not using a Tutorial-example
+** Behaving like `powertop` and update suggestions
+* Interact with "lower level" stuff
+** My go-to would be JVM and _go_ will be better for that
+* Get to know how to manage "complex" projects the go-way
+** I want to Accept a heterogeneous set of information-sources
+** I want a plugin-like solution (without actually sideloading)
+
+=== Approach
+
+* The approach will *deliberately* be over-engineered
+** The goal is for me to understand
+** follow-along my current questions in xref:remarks.adoc[]

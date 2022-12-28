@@ -1,3 +1,0 @@
-* No constructor?!
-* Output in parameter (channel)
-* Class-level constants?

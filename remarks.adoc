@@ -1,0 +1,18 @@
+
+
+=== the good
+
+* Actually talking to dbus was quick
+* Actually talking to X11 went quickly
+
+=== the bad
+
+* No constructor?!
+* Output in parameter (channel)
+* Class-level constants?
+* Nomenclature: All-caps OK, but snake-case on all-caps not?
+* NULLABILITY!!
+* Switch-case:
+    - No add-remaining als IDE-Completion
+    - Ich muss den ordinal-type angeben, kann den aber nicht explizit wählen?
+    - Switches auf "self" für Enum-Attribute?!
